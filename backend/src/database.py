@@ -6,10 +6,11 @@ from src.models import Document
 
 class Database:
     def __init__(self, db_path: str = "copilot.db"):
-        self._conn = sqlite3.connect(db_path, check_same_thread=False)
+        self._conn = sqlite3.connect(db_path, check_same_thread=False, timeout=10)
         self._conn.row_factory = sqlite3.Row
 
     def initialize(self):
+        self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS documents (
                 id TEXT PRIMARY KEY,

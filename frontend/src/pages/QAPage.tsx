@@ -38,36 +38,20 @@ export default function QAPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
       });
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const normalized = buffer.replace(/\r\n/g, "\n");
-        const lines = normalized.split("\n\n");
-        buffer = lines.pop() || "";
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const event: TraceEvent = JSON.parse(line.slice(6));
-            setQaList((prev) => prev.map((q) =>
-              q.question === question
-                ? {
-                    ...q,
-                    events: [...q.events, event],
-                    traceId: event.trace_id || q.traceId,
-                    answer: event.event_type === "agent_answer"
-                      ? String((event.output as Record<string, unknown>).answer || "")
-                      : q.answer,
-                  }
-                : q
-            ));
-            if (event.event_type === "agent_answer") setLoading(false);
-          }
-        }
-      }
-    } catch { setLoading(false); }
+      const data = await response.json();
+      setQaList((prev) => prev.map((q) =>
+        q.question === question
+          ? { ...q, answer: data.answer || "未获取到答案" }
+          : q
+      ));
+    } catch {
+      setQaList((prev) => prev.map((q) =>
+        q.question === question
+          ? { ...q, answer: "请求失败" }
+          : q
+      ));
+    }
+    setLoading(false);
   };
 
   return (

@@ -42,30 +42,50 @@ export default function DocManager() {
     if (!file) return;
     setUploading(true);
     setEvents([]);
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await fetch("http://localhost:8000/api/upload", { method: "POST", body: formData });
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const normalized = buffer.replace(/\r\n/g, "\n");
-      const lines = normalized.split("\n\n");
-      buffer = lines.pop() || "";
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const event: TraceEvent = JSON.parse(line.slice(6));
-          setEvents((prev) => [...prev, event]);
-          if (event.event_type === "doc_indexed") {
-            setUploading(false);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("http://localhost:8000/api/upload", { method: "POST", body: formData });
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const step = JSON.parse(line);
+          if (step.step === "done") {
+            setEvents((prev) => [...prev, {
+              trace_id: "", span_id: "", parent_span_id: null,
+              event_type: "doc_indexed", status: "done", input: {}, output: {},
+            }]);
             loadDocs();
+          } else if (step.step === "error") {
+            setEvents((prev) => [...prev, {
+              trace_id: "", span_id: "", parent_span_id: null,
+              event_type: "upload_error", status: "error", input: {}, output: {},
+            }]);
+          } else {
+            setEvents((prev) => [...prev, {
+              trace_id: "", span_id: "", parent_span_id: null,
+              event_type: "doc_" + step.step, status: "done", input: {}, output: {},
+            }]);
           }
         }
       }
+    } catch {
+      setEvents((prev) => [...prev, {
+        trace_id: "", span_id: "", parent_span_id: null,
+        event_type: "upload_error", status: "error", input: {}, output: {},
+      }]);
     }
+    setUploading(false);
   };
 
   const [selected, setSelected] = useState<string[]>([]);
@@ -91,27 +111,12 @@ export default function DocManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ document_ids: selected.length ? selected : null }),
       });
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const normalized = buffer.replace(/\r\n/g, "\n");
-        const lines = normalized.split("\n\n");
-        buffer = lines.pop() || "";
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const event: TraceEvent = JSON.parse(line.slice(6));
-            if (event.event_type === "summary_done") {
-              setSummary(String((event.output as Record<string, unknown>).summary || ""));
-              setSummarizing(false);
-            }
-          }
-        }
-      }
-    } catch { setSummarizing(false); }
+      const data = await response.json();
+      setSummary(data.summary || "生成失败");
+    } catch {
+      setSummary("请求失败");
+    }
+    setSummarizing(false);
   };
 
   const indexedDocs = docs.filter((d) => d.status === "indexed");
