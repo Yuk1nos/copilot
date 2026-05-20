@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash *)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Bash(pip install *)",
+      "Bash(python -m pytest tests/test_models.py -v)",
+      "Bash(python -m pytest tests/test_database.py -v)",
+      "Bash(ls E:\\\\IT-Tool\\\\code\\\\Copilot\\\\backend\\\\src\\\\ *)",
+      "Bash(python -m pytest tests/test_tracer.py -v)",
+      "Bash(python -m pytest tests/test_llm.py -v)",
+      "Bash(python -m pytest tests/test_splitter.py -v)",
+      "Bash(python -m pytest tests/test_document_parser.py -v)",
+      "Bash(python -m pytest tests/test_chroma_store.py -v)",
+      "Bash(python -c \"from chromadb import Client; print\\(type\\(Client\\)\\)\")",
+      "Bash(python -m pytest tests/test_tools.py -v)",
+      "Bash(python -m pytest tests/test_agent_loop.py -v)",
+      "Bash(python -m pytest tests/test_workflows.py -v)",
+      "Bash(python -m pytest tests/test_api.py -v)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(python -m pytest tests/test_api.py tests/test_models.py -v --tb=short)",
+      "Bash(python -m pytest tests/test_embedder.py tests/test_chroma_store.py tests/test_api.py tests/test_models.py tests/test_tracer.py tests/test_llm.py tests/test_tools.py tests/test_agent_loop.py tests/test_workflows.py tests/test_splitter.py tests/test_database.py tests/test_document_parser.py -v --tb=short)",
+      "Bash(curl *)",
+      "Bash(python -m pytest tests/test_tracer.py tests/test_workflows.py tests/test_agent_loop.py -v --tb=short)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python *)",
+      "Bash(netstat -ano)",
+      "Bash(npx *)"
+    ]
+  }
+}
