@@ -145,6 +145,14 @@ python -m pytest tests/ -v
 ```
 
 
+## 演示
+
+<!-- 上传演示视频到 GitHub Releases 后，替换下面的链接 -->
+
+<video src="https://github.com/Yuk1nos/copilot/releases/download/v0.1.0/demo.mp4" controls width="100%"></video>
+
+> 如果视频无法播放，点击 [查看演示](https://github.com/Yuk1nos/copilot/releases)
+
 ## 文件限制
 
 - 单文件上限 10MB
